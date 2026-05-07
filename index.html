@@ -311,7 +311,11 @@ function onFilterChange(){
   const cargo = document.getElementById('sCargo').value;
 
   // Unique election keys in filtered data
-  const elections = [...new Set(data.map(r=>`${r.anio} ${r.tipo} ${r.cargo}`))].sort();
+  const tipoOrder = {PASO:0, General:1, Balotaje:2};
+  const elections = [...new Set(data.map(r=>`${r.anio} ${r.tipo} ${r.cargo}`))].sort((a,b)=>{
+    const [ay,at] = a.split(' '); const [by,bt] = b.split(' ');
+    return ay!==by ? ay.localeCompare(by) : (tipoOrder[at]??9)-(tipoOrder[bt]??9);
+  });
   const isSingle  = elections.length === 1;
 
   // Detect if this is a PASO election (for PJ sublistas)
@@ -492,7 +496,10 @@ function onFilterChange(){
     const histElecs = isSingle
       ? [...new Set(HIST.map(r=>`${r.anio} ${r.tipo}`))].sort()
       : elecLabels.map((l,i)=>elections[i].split(' ').slice(0,2).join(' '));
-    const histLabels = [...new Set(HIST.map(r=>`${r.anio} ${r.tipo}`))].sort();
+    const histLabels = [...new Set(HIST.map(r=>`${r.anio} ${r.tipo}`))].sort((a,b)=>{
+      const [ay,at]=a.split(' '); const [by,bt]=b.split(' ');
+      return ay!==by ? ay.localeCompare(by) : (tipoOrder[at]??9)-(tipoOrder[bt]??9);
+    });
     const lineDatasets = allPids.map(pid=>({
       label: LABELS[pid]||pid,
       data: (isSingle ? histLabels : elecLabels).map(elecStr=>{
